@@ -80,6 +80,11 @@ def now() -> datetime:
 
 def setup_logging(service: str) -> logging.Logger:
     level = env("LOG_LEVEL", "INFO")
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8", errors="replace")
+        except Exception:  # noqa: BLE001
+            pass
     logging.basicConfig(
         stream=sys.stdout,
         level=level,

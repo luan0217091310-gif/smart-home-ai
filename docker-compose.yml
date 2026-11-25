@@ -1,0 +1,62 @@
+# Chạy toàn bộ hệ thống:  docker compose up -d
+# Windows (webcam USB): chạy stream_producer ngoài Docker — xem README, mục "Windows".
+#   docker compose up -d redis worker_face worker_object worker_fall assistant_api dashboard
+name: smart-home-ai
+
+x-common: &common
+  env_file: .env
+  environment:
+    TZ: Asia/Ho_Chi_Minh
+    DATA_DIR: /app/data
+    MODELS_DIR: /app/models
+    REDIS_URL: redis://redis:6379/0
+    DATABASE_URL: sqlite:////app/data/smarthome.db
+  volumes:
+    - ./data:/app/data
+    - ./models:/app/models
+    - ./config:/app/config:ro
+  restart: unless-stopped
+  networks: [smarthome]
+  logging:
+    driver: json-file
+    options: {max-size: "10m", max-file: "3"}
+  depends_on:
+    redis: {condition: service_healthy}
+
+x-gpu: &gpu
+  deploy:
+    resources:
+      reservations:
+        devices:
+          - {driver: nvidia, count: all, capabilities: [gpu]}
+
+services:
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru"]
+    ports: ["127.0.0.1:6379:6379"]
+    restart: unless-stopped
+    networks: [smarthome]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
+
+  stream_producer:
+    <<: *common
+    build: {context: ., dockerfile: services/stream_producer/Dockerfile}
+    # Linux + webcam USB: bỏ comment 2 dòng dưới
+    # devices: ["/dev/video0:/dev/video0"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import redis,time,os;r=redis.Redis.from_url(os.environ['REDIS_URL']);v=r.get('heartbeat:stream_producer');exit(0 if v else 1)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+
+networks:
+  smarthome: {}

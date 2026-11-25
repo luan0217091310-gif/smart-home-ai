@@ -1,0 +1,7 @@
+-r services/stream_producer/requirements.txt
+pytest==9.2.0
+fakeredis==2.41.0
+fastapi==0.165.0
+httpx==0.28.1
+uvicorn==0.54.0
+streamlit==1.67.0

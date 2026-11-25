@@ -1,0 +1,7 @@
+numpy==2.4.6
+opencv-python-headless==5.1.0.95
+redis==8.2.0
+SQLAlchemy==2.0.44
+PyYAML==6.0.4
+python-dotenv==1.2.4
+requests==2.34.2
