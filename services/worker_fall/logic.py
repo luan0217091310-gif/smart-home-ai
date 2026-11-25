@@ -17,6 +17,7 @@ import numpy as np
 
 # Chỉ số COCO-17
 L_SH, R_SH, L_HIP, R_HIP = 5, 6, 11, 12
+LOWER_BODY = [13, 14, 15, 16]  # gối, cổ chân
 
 NORMAL, FALLING, LYING, CONFIRMED = "normal", "falling", "lying", "confirmed"
 
@@ -74,10 +75,20 @@ class FallDetector:
         self.people: dict[int, PersonState] = {}
 
     def _is_lying(self, bbox, kps) -> bool:
-        x1, y1, x2, y2 = bbox
-        w, h = x2 - x1, max(1e-6, y2 - y1)
+        """Cần thấy thân (vai + hông). Khung bao bè ngang chỉ tính khi thân cũng nghiêng rõ (> 30°),
+        vì người bị đồ vật che nửa dưới cũng cho khung bao bè ngang."""
         tilt = torso_tilt_deg(kps, self.p.keypoint_min_conf)
-        return (w / h) > self.p.lying_aspect_ratio or (tilt is not None and tilt > self.p.torso_tilt_deg)
+        if tilt is None:
+            return False
+        x1, y1, x2, y2 = bbox
+        aspect = (x2 - x1) / max(1e-6, y2 - y1)
+        return tilt > self.p.torso_tilt_deg or (aspect > self.p.lying_aspect_ratio and tilt > 30)
+
+    def _torso_mid(self, kps):
+        """Trung điểm vai–hông, CHỈ khi thấy cả vai lẫn hông (tránh điểm nhảy khi hông lúc thấy lúc mất)."""
+        sh = _mean_pt(kps, [L_SH, R_SH], self.p.keypoint_min_conf)
+        hip = _mean_pt(kps, [L_HIP, R_HIP], self.p.keypoint_min_conf)
+        return None if sh is None or hip is None else (sh + hip) / 2
 
     def _motion(self, st: PersonState, kps: np.ndarray) -> float:
         """Dịch chuyển trung bình so với điểm mốc, theo đơn vị chiều cao người."""
@@ -96,10 +107,11 @@ class FallDetector:
         x1, y1, x2, y2 = bbox
         bw, bh = x2 - x1, y2 - y1
         lying = self._is_lying(bbox, kps)
-        # chiều cao lúc đứng: cập nhật khi người đứng thẳng
-        if not lying and bh > bw and st.state == NORMAL:
+        mid = self._torso_mid(kps)
+        full_body = mid is not None and bool((kps[LOWER_BODY, 2] >= self.p.keypoint_min_conf).any())
+        # chiều cao lúc đứng: chỉ cập nhật khi đứng thẳng và thấy cả thân dưới (người bị che thì không có thước đo)
+        if not lying and bh > bw and full_body and st.state == NORMAL:
             st.height = bh if st.height is None else 0.8 * st.height + 0.2 * bh
-        mid = _mean_pt(kps, [L_SH, R_SH, L_HIP, R_HIP], self.p.keypoint_min_conf)
         if mid is not None:
             st.history.append((ts, float(mid[1])))
         hip = _mean_pt(kps, [L_HIP, R_HIP], self.p.keypoint_min_conf)

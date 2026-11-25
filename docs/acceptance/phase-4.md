@@ -13,7 +13,7 @@ Ngày: 25/11/2026
   - Đứng dậy trước 4 s → huỷ. Xác nhận → `alerts` loại `fall`, Telegram khẩn kèm ảnh, cooldown 60 s/người.
 - `scripts/eval_fall_videos.py`: chạy bộ video `data/test_videos/{fall,normal}/`, in bảng đúng/sai và tốc độ rơi lớn nhất từng video để chọn `drop_speed_threshold`.
 
-## Kết quả kiểm thử tự động (`tests/test_fall.py`, 8 bài, đều đạt)
+## Kết quả kiểm thử tự động (`tests/test_fall.py`, 9 bài, đều đạt)
 
 | Kịch bản giả lập | Kết quả |
 | --- | --- |
@@ -24,8 +24,16 @@ Ngày: 25/11/2026
 | Ngồi phịch xuống | Không báo |
 | Nằm nhưng còn cử động | Chỉ báo sau khi đứng yên đủ 4 s |
 | Mất khung trong lúc ngã | Vẫn tính đúng theo `ts` |
+| Người bị che nửa dưới, hông lúc thấy lúc mất | Không báo |
 
-worker_fall chạy thật trong Docker (GPU) với webcam: nạp `yolo26n-pose.pt`, theo dấu người, healthy; không báo nhầm trong thời gian chạy thử (người ngồi trong quán).
+worker_fall chạy thật trong Docker (GPU) với webcam đặt trong quán cà phê: nạp `yolo26n-pose.pt`, theo dấu người, healthy.
+
+**Ca báo nhầm thật (22:47, 25/11) và cách sửa.** Một khách ngồi sau lưng ghế sofa, chỉ thấy đầu–vai, bị xác nhận "ngã".
+Nguyên nhân: (1) điểm hông lúc thấy lúc mất làm trung điểm vai–hông nhảy xuống → giả "vận tốc rơi"; (2) chiều cao người
+đo từ khung bao bị cắt nên rất nhỏ → vận tốc chuẩn hóa bị phóng đại; (3) khung bao bè ngang được coi là "nằm".
+Đã sửa: chỉ dùng trung điểm khi thấy **cả vai lẫn hông**; chỉ đo chiều cao khi **thấy thân dưới** (gối/cổ chân);
+khung bao bè ngang chỉ tính là nằm khi **thân nghiêng > 30°**. Thêm bài kiểm thử hồi quy
+`test_occluded_person_behind_sofa_no_alarm` (thất bại với code cũ, đạt với code mới). Cảnh báo đó đã đánh dấu `false_alarm`.
 
 `drop_speed_threshold` tạm đặt **0,8 chiều cao người/giây** — phải hiệu chỉnh bằng video thật.
 

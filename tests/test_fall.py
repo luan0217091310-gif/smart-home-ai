@@ -114,3 +114,19 @@ def test_uses_real_timestamps_with_dropped_frames():
             ev.append(t)
         t += 1 / FPS
     assert len(ev) == 1
+
+
+def test_occluded_person_behind_sofa_no_alarm():
+    """Ca báo nhầm thật (quán cà phê 25/11): chỉ thấy đầu–vai sau lưng ghế. Hông lúc mất lúc thấy làm
+    trung điểm vai–hông 'nhảy xuống', sau đó khung bao bè ngang và người ngồi yên. Không được báo."""
+    top = FLOOR - H
+    def frame(hips_visible, wide):
+        _, k = standing(top=top)
+        k[13:17, 2] = 0.1                                   # thân dưới bị che
+        k[11:13, 2] = 0.9 if hips_visible else 0.1
+        bbox = ((X - 0.35 * H, top, X + 0.35 * H, top + 0.35 * H) if wide
+                else (X - 0.12 * H, top, X + 0.12 * H, top + 0.4 * H))
+        return bbox, k
+    seq = ([frame(False, False)] * int(2 * FPS) + [frame(True, False)] * 3
+           + [frame(True, True)] * int(8 * FPS))
+    assert run(make(), seq) == []
