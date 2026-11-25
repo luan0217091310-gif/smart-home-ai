@@ -10,7 +10,8 @@ if ($Stop) {
     "Đã dừng."
     return
 }
-docker compose up -d
+# Windows: webcam đọc bằng Python bên dưới, KHÔNG bật container stream_producer
+docker compose up -d redis worker_face worker_object worker_fall assistant_api dashboard maintenance
 if (-not $producer) {
     Start-Process -FilePath ".venv\Scripts\python.exe" -ArgumentList "services\stream_producer\main.py" `
         -WindowStyle Hidden -RedirectStandardOutput "data\producer.log" -RedirectStandardError "data\producer.err.log"
