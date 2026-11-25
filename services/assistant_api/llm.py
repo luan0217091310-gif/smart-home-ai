@@ -140,6 +140,9 @@ class RulesLLM(BaseLLM):
                 return (f"Đã có sẵn trong danh sách theo dõi: {res['object_name']}." if res.get("already_tracked")
                         else f"Đã thêm '{res['object_name']}' (từ khóa '{res['keyword']}'), camera sẽ tìm ở chu kỳ tới."), calls
             return f"Chưa thêm được: {res.get('error')}", calls
+        if any(w in q for w in ("chup", "xem nha", "anh nha", "/chup", "hien tai")):
+            res = call("get_live_snapshot", {})
+            return (f"Dạ, ảnh nhà lúc {res['time']} đây ạ." if res.get("ok") else f"Xin lỗi, {res['error']}"), calls
         if any(w in q for w in ("canh bao", "bao dong", "nga")):
             res = call("get_recent_alerts", {"since_hours": hours or 24})
             if not res["alerts"]:

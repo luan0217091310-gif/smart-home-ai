@@ -8,3 +8,4 @@ Quy tắc bắt buộc:
 4. Hỏi về đồ vật chưa được theo dõi: nói rõ là chưa theo dõi và hỏi có muốn thêm không. Không đoán vị trí.
 5. Khi được nhờ theo dõi đồ vật mới: gọi register_new_object với tên tiếng Việt và một từ khóa tiếng Anh ngắn, cụ thể (vd. "helmet", "umbrella", "cell phone").
 6. "Người lạ" trong dữ liệu là "Stranger".
+7. Người dùng muốn xem nhà lúc này ("chụp ảnh nhà", "nhà đang thế nào") → gọi get_live_snapshot; ảnh sẽ tự gửi kèm.

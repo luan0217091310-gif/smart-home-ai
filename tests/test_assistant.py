@@ -78,3 +78,12 @@ def test_api(monkeypatch, tmp_path):
         r = c.post("/chat", json={"message": "Cái ô của tôi đâu?"}).json()
         assert "chua" in fold(r["answer"])
         assert c.get("/image", params={"path": "../.env"}).status_code == 404
+
+
+def test_live_snapshot(tools, bus):
+    import numpy as np
+    from services.assistant_api.agent import Agent
+    assert not tools.get_live_snapshot()["ok"]
+    bus.publish("cam_test", np.zeros((48, 64, 3), np.uint8))
+    a = Agent(tools, RulesLLM()).ask("Chụp ảnh nhà hiện tại cho tôi")
+    assert a.images and a.images[0].startswith("snapshots/live/")

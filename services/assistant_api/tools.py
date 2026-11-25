@@ -70,6 +70,9 @@ class Tools:
          "parameters": {"type": "object", "properties": {
              "since_hours": {"type": "number", "description": "Số giờ nhìn lại, mặc định 24."},
              "alert_type": {"type": "string", "enum": ["stranger", "fall", "system"]}}}},
+        {"name": "get_live_snapshot",
+         "description": "Chụp ảnh hiện tại từ camera trong nhà (khi người dùng muốn xem nhà lúc này).",
+         "parameters": {"type": "object", "properties": {}}},
         {"name": "list_tracked_objects", "description": "Liệt kê các đồ vật đang được theo dõi.",
          "parameters": {"type": "object", "properties": {}}},
         {"name": "remove_object", "description": "Ngừng theo dõi một đồ vật.",
@@ -158,6 +161,27 @@ class Tools:
         return {"since_hours": h, "count": len(rows), "alerts": [
             {"type": a.alert_type, "time": _fmt(a.timestamp), "ago": ago(a.timestamp), "message": a.message,
              "status": a.status, "image_path": a.image_path} for a in rows[:20]]}
+
+    def get_live_snapshot(self) -> dict:
+        import time
+
+        import cv2
+        import numpy as np
+
+        from shared.config import camera_id
+        from shared.snapshots import save_snapshot
+        if self.bus is None:
+            return {"ok": False, "error": "Không kết nối được camera (Redis)."}
+        raw = self.bus.get_latest_jpeg(camera_id())
+        if raw is None:
+            return {"ok": False, "error": "Camera chưa có hình."}
+        jpg, _, ts = raw
+        age = time.time() - ts
+        if age > 30:
+            return {"ok": False, "error": f"Camera mất tín hiệu, hình mới nhất đã cũ {int(age)} giây."}
+        img = cv2.imdecode(np.frombuffer(jpg, np.uint8), cv2.IMREAD_COLOR)
+        rel = save_snapshot("live", img)
+        return {"ok": True, "time": _fmt(now()), "image_path": rel}
 
     def list_tracked_objects(self) -> dict:
         return {"objects": [{"name": o.object_name, "keyword": o.prompt_keyword, "zone": o.last_zone,

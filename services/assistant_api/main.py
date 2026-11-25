@@ -91,6 +91,17 @@ async def voice_endpoint(file: UploadFile = File(...)):
     return {"transcript": text, "answer": a.text, "images": a.images, "elapsed_s": a.elapsed_s}
 
 
+@app.get("/snapshot")
+def snapshot():
+    """Ảnh hiện tại từ camera (JPEG)."""
+    from fastapi.responses import Response
+    from shared.config import camera_id
+    raw = bus.get_latest_jpeg(camera_id()) if bus else None
+    if raw is None:
+        raise HTTPException(503, "Camera chưa có hình")
+    return Response(raw[0], media_type="image/jpeg")
+
+
 @app.get("/image")
 def image(path: str):
     """Trả ảnh trong data/snapshots — chặn truy cập ra ngoài thư mục."""

@@ -56,6 +56,8 @@ class TelegramBot:
             self.client.send_text(f"🎙️ {text}", chat_id)
         if not text:
             return
+        if text.strip().startswith("/chup"):
+            text = "chụp ảnh nhà hiện tại"
         if text.strip() in ("/start", "/help"):
             self.client.send_text("Xin chào! Hỏi em: 'Nãy giờ có ai vào nhà không?', 'Chìa khóa của tôi đâu?', "
                                   "'Hôm nay có cảnh báo gì không?'", chat_id)
