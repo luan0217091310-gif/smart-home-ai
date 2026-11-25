@@ -36,16 +36,17 @@ const FAQ = [
 export default function Setup() {
   return (
     <>
-      <PageHero kicker="Cài đặt" title={<>Từ con số 0 đến<br /><em>chạy được trong một buổi.</em></>}>
+      <PageHero kicker="Cài đặt" title="Cài đặt xong trong một buổi chiều">
         Năm bước, đều là sao chép một lệnh. README trên GitHub có giải thích chi tiết từng biến cấu hình và lỗi thường gặp.
       </PageHero>
 
-      <div className="reqs reveal">{REQS.map(([k, v]) => <div key={k}><small>{k}</small><b>{v}</b></div>)}</div>
+      <div className="reqs">{REQS.map(([k, v]) => <div key={k}><small>{k}</small><b>{v}</b></div>)}</div>
 
+      <h2 className="setup-h">Năm bước cài đặt</h2>
       <ol className="setup">
         {STEPS.map((s, i) => (
-          <li key={s.t} className="reveal">
-            <span className="step-n">{i + 1}</span>
+          <li key={s.t} >
+            <span className="step-num mono" aria-hidden>{String(i + 1).padStart(2, "0")}</span>
             <div className="setup-body">
               <h3>{s.t}</h3>
               <p>{s.d}</p>
@@ -56,9 +57,9 @@ export default function Setup() {
       </ol>
 
       <section id="camera" className="section">
-        <div className="sec-head reveal"><span className="kicker">Camera tương thích</span><h2>Chọn camera có RTSP</h2>
+        <div className="sec-head"><span className="kicker">Camera tương thích</span><h2>Chọn camera có RTSP</h2>
           <p>Trước khi mua, tìm “&lt;tên model&gt; RTSP”. Có hướng dẫn là dùng được — chỉ cần sửa một dòng trong .env.</p></div>
-        <div className="table-wrap reveal">
+        <div className="table-wrap">
           <table className="svc-table">
             <thead><tr><th>Hãng</th><th>Dùng được</th><th>Ghi chú</th></tr></thead>
             <tbody>{CAMS.map(([n, s, d]) => (
@@ -70,9 +71,9 @@ export default function Setup() {
       </section>
 
       <section className="section">
-        <div className="sec-head reveal"><span className="kicker">Câu hỏi thường gặp</span><h2>Trước khi bắt đầu</h2></div>
+        <div className="sec-head"><span className="kicker">Câu hỏi thường gặp</span><h2>Trước khi bắt đầu</h2></div>
         <div className="faq">
-          {FAQ.map(([q, a]) => <details key={q} className="reveal"><summary>{q}</summary><p>{a}</p></details>)}
+          {FAQ.map(([q, a]) => <details key={q} ><summary>{q}</summary><p>{a}</p></details>)}
         </div>
       </section>
       <CtaBand />
@@ -86,7 +87,7 @@ function CodeBlock({ code }: { code: string }) {
     <div className="codeblock">
       <pre className="mono">{code}</pre>
       <button onClick={() => { navigator.clipboard?.writeText(code); setCopied(true); setTimeout(() => setCopied(false), 1500); }}>
-        {copied ? "✓ Đã chép" : "Sao chép"}
+        {copied ? "Đã chép" : "Sao chép"}
       </button>
     </div>
   );

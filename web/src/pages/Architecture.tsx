@@ -38,11 +38,11 @@ const PHASES = [
 export default function Architecture() {
   return (
     <>
-      <PageHero kicker="Kiến trúc" title={<>Đọc camera một lần,<br /><em>mỗi AI một nhịp riêng.</em></>}>
+      <PageHero kicker="Kiến trúc" title="Đọc camera một lần, mỗi tính năng AI chạy theo nhịp riêng">
         Kiến trúc Producer–Consumer quanh Redis: thêm tính năng mới chỉ là thêm một service, một service lỗi không kéo cả hệ thống dừng theo.
       </PageHero>
 
-      <section className="arch reveal" aria-label="Sơ đồ kiến trúc">
+      <section className="arch" aria-label="Sơ đồ kiến trúc">
         <div className="lane">
           <Node k="Camera" v="Webcam · RTSP · video" />
           <Arrow />
@@ -67,8 +67,8 @@ export default function Architecture() {
       </section>
 
       <section className="section">
-        <div className="sec-head reveal"><span className="kicker">Các service</span><h2>Bảy khối, mỗi khối một việc</h2></div>
-        <div className="table-wrap reveal">
+        <div className="sec-head"><span className="kicker">Các service</span><h2>Bảy khối, mỗi khối một việc</h2></div>
+        <div className="table-wrap">
           <table className="svc-table">
             <thead><tr><th>Service</th><th>Nhiệm vụ</th><th>Nhịp xử lý</th></tr></thead>
             <tbody>{SERVICES.map(([a, b, c]) => <tr key={a}><td className="mono">{a}</td><td>{b}</td><td>{c}</td></tr>)}</tbody>
@@ -77,22 +77,22 @@ export default function Architecture() {
       </section>
 
       <section className="section">
-        <div className="sec-head reveal"><span className="kicker">Nguyên tắc thiết kế</span><h2>Ổn định trước, thông minh sau</h2></div>
-        <div className="mini-grid">{PRINCIPLES.map(([t, d]) => <div key={t} className="mini reveal"><h3>{t}</h3><p>{d}</p></div>)}</div>
+        <div className="sec-head"><span className="kicker">Nguyên tắc thiết kế</span><h2>Ổn định trước, thông minh sau</h2></div>
+        <div className="mini-grid">{PRINCIPLES.map(([t, d]) => <div key={t} className="mini"><h3>{t}</h3><p>{d}</p></div>)}</div>
       </section>
 
       <section className="section">
-        <div className="sec-head reveal"><span className="kicker">Công nghệ</span><h2>Ghép từ những mảnh tốt nhất</h2></div>
-        <div className="stack-groups reveal">
-          {STACK.map(([g, items]) => <div key={g}><h4>{g}</h4><div className="stack">{items.map((s) => <span key={s}>{s}</span>)}</div></div>)}
+        <div className="sec-head"><span className="kicker">Công nghệ</span><h2>Ghép từ những mảnh tốt nhất</h2></div>
+        <div className="stack-groups">
+          {STACK.map(([g, items]) => <div key={g}><h3 className="sub-h">{g}</h3><div className="stack">{items.map((s) => <span key={s}>{s}</span>)}</div></div>)}
         </div>
       </section>
 
       <section className="section">
-        <div className="sec-head reveal"><span className="kicker">Lộ trình</span><h2>Tám giai đoạn, mỗi giai đoạn một điểm duyệt</h2></div>
+        <div className="sec-head"><span className="kicker">Lộ trình</span><h2>Tám giai đoạn, mỗi giai đoạn một điểm duyệt</h2></div>
         <ol className="timeline">
           {PHASES.map(([n, t, d, done]) => (
-            <li key={n} className={`reveal ${done ? "done" : ""}`}>
+            <li key={n} className={done ? "done" : ""}>
               <span className="mono ph">{n}</span>
               <div><b>{t}</b><small>{d}</small></div>
               <span className={`state ${done ? "ok" : ""}`}>{done ? "Đã có code" : "Chờ camera"}</span>

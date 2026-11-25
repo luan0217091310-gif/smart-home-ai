@@ -1,5 +1,5 @@
 import { CtaBand, PageHero } from "../Layout";
-import { Icon } from "./Home";
+import { Icon } from "../icons";
 
 const FLOW = [
   ["Video trực tiếp", "RAM (Redis), không lưu", "no"],
@@ -26,18 +26,18 @@ const LICENSES = [
 export default function Privacy() {
   return (
     <>
-      <PageHero kicker="Quyền riêng tư" title={<>Hình ảnh của nhà bạn<br /><em>ở lại trong nhà bạn.</em></>}>
+      <PageHero kicker="Quyền riêng tư" title="Hình ảnh trong nhà bạn ở lại trong nhà bạn">
         Hệ thống xử lý khuôn mặt người thân, nên mặc định mọi hình ảnh nằm trên máy trong nhà — chỉ phần tối thiểu được gửi ra ngoài.
       </PageHero>
 
       <section className="section first">
-        <div className="sec-head reveal"><span className="kicker">Dữ liệu đi đâu</span><h2>Minh bạch từng loại dữ liệu</h2></div>
+        <div className="sec-head"><span className="kicker">Dữ liệu đi đâu</span><h2>Minh bạch từng loại dữ liệu</h2></div>
         <div className="flow">
           {FLOW.map(([k, where, out, why]) => (
-            <div key={k} className={`flow-row reveal ${out}`}>
+            <div key={k} className={`flow-row ${out}`}>
               <b>{k}</b><small>{where}</small>
               <span className={`pill ${out === "no" ? "ok" : "warn"}`}>{out === "no" ? "Không rời nhà" : "Rời nhà"}</span>
-              {why && <em>{why}</em>}
+              {why && <small className="why">{why}</small>}
             </div>
           ))}
         </div>
@@ -45,11 +45,11 @@ export default function Privacy() {
 
       <section className="section">
         <div className="mini-grid">
-          {PROMISES.map((p) => <div key={p.t} className="mini reveal"><div className="f-ico"><Icon name={p.icon} /></div><h3>{p.t}</h3><p>{p.d}</p></div>)}
+          {PROMISES.map((p) => <div key={p.t} className="mini"><div className="f-ico"><Icon name={p.icon} /></div><h3>{p.t}</h3><p>{p.d}</p></div>)}
         </div>
       </section>
 
-      <section className="section split reveal">
+      <section className="section split">
         <div>
           <span className="kicker">Pháp luật</span>
           <h2>Tôn trọng người xung quanh</h2>

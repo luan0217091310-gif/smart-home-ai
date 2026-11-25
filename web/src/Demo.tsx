@@ -4,13 +4,14 @@ import { chat, getHomeUrl, health, imageUrl, setHomeUrl, snapshotUrl } from "./a
 import { accessLog, ago, initialAlerts, initialObjects, members, SERVICES, type Alert, type TrackedObject } from "./data";
 import { demoAnswer } from "./demoAssistant";
 import { LiveFeed } from "./LiveFeed";
+import { Icon } from "./icons";
 
 type Tab = "live" | "members" | "objects" | "chat";
 const TABS: { id: Tab; label: string; icon: string }[] = [
-  { id: "live", label: "Live & Cảnh báo", icon: "◉" },
-  { id: "members", label: "Thành viên", icon: "☺" },
-  { id: "objects", label: "Đồ vật & Vùng", icon: "⌖" },
-  { id: "chat", label: "Trợ lý", icon: "✦" },
+  { id: "live", label: "Live & Cảnh báo", icon: "cam" },
+  { id: "members", label: "Thành viên", icon: "face" },
+  { id: "objects", label: "Đồ vật & Vùng", icon: "target" },
+  { id: "chat", label: "Trợ lý", icon: "chat" },
 ];
 const ALERT_META = {
   stranger: { label: "Người lạ", cls: "warn" },
@@ -84,13 +85,14 @@ export function Demo() {
       const message = fall ? "KHẨN: người té ngã và nằm yên ở phòng khách" : `Phát hiện người lạ ở cửa chính (độ tương đồng ${(Math.random() * 0.2).toFixed(2)})`;
       setAlerts((xs) => [{ id: Math.max(0, ...xs.map((a) => a.id)) + 1, type: fall ? "fall" : "stranger", message, minutesAgo: 0, status: "sent" }, ...xs]);
       setFlash(fall ? "danger" : "warn");
-      pushToast({ tone: fall ? "danger" : "warn", title: fall ? "🆘 Telegram · Cảnh báo khẩn" : "🚨 Telegram · Người lạ", body: `${message} — ${now}` });
+      pushToast({ tone: fall ? "danger" : "warn", title: fall ? "Telegram · Cảnh báo khẩn" : "Telegram · Người lạ", body: `${message} — ${now}` });
     }
     setTimeout(() => setFlash(""), 1600);
   };
 
   return (
     <div className="demo" id="demo">
+      <h2 className="sr-only">Dashboard demo</h2>
       <div className="demo-bar">
         <div className="dots"><i /><i /><i /></div>
         <div className="demo-url mono">{homeState === "ok" ? home : "demo.smart-home-ai · dữ liệu mẫu"}</div>
@@ -113,7 +115,7 @@ export function Demo() {
         <nav className="side" aria-label="Tab dashboard">
           {TABS.map((t) => (
             <button key={t.id} className={tab === t.id ? "active" : ""} onClick={() => setTab(t.id)}>
-              <span className="ico">{t.icon}</span>
+              <span className="ico"><Icon name={t.icon} /></span>
               <span>{t.label}</span>
               {t.id === "live" && counts.open > 0 && <b className="badge">{counts.open}</b>}
             </button>
@@ -128,9 +130,9 @@ export function Demo() {
                 {homeState !== "ok" && (
                   <div className="sim" role="group" aria-label="Mô phỏng sự kiện">
                     <span>Mô phỏng:</span>
-                    <button className="ghost" onClick={() => simulate("stranger")}>🚨 Người lạ</button>
-                    <button className="ghost" onClick={() => simulate("fall")}>🆘 Té ngã</button>
-                    <button className="ghost" onClick={() => simulate("phone")}>📱 Thấy điện thoại</button>
+                    <button className="ghost" onClick={() => simulate("stranger")}>Người lạ</button>
+                    <button className="ghost" onClick={() => simulate("fall")}>Té ngã</button>
+                    <button className="ghost" onClick={() => simulate("phone")}>Thấy điện thoại</button>
                   </div>
                 )}
                 <div className="stats">
@@ -141,7 +143,7 @@ export function Demo() {
                 </div>
               </div>
               <div className="col">
-                <h4>Trạng thái service</h4>
+                <h3 className="sub-h">Trạng thái service</h3>
                 <ul className="svc">
                   {SERVICES.map((s, i) => (
                     <li key={s.id}>
@@ -151,7 +153,7 @@ export function Demo() {
                     </li>
                   ))}
                 </ul>
-                <h4>Cảnh báo</h4>
+                <h3 className="sub-h">Cảnh báo</h3>
                 <ul className="alerts">
                   {alerts.map((a) => (
                     <li key={a.id} className={a.status === "false_alarm" ? "muted" : ""}>
@@ -161,8 +163,8 @@ export function Demo() {
                       </div>
                       <p>{a.message}</p>
                       <div className="row gap">
-                        <button className="ghost" disabled={a.status === "acknowledged"} onClick={() => setStatus(a.id, "acknowledged")}>✓ Đã xem</button>
-                        <button className="ghost" disabled={a.status === "false_alarm"} onClick={() => setStatus(a.id, "false_alarm")}>⊘ Báo giả</button>
+                        <button className="ghost" disabled={a.status === "acknowledged"} onClick={() => setStatus(a.id, "acknowledged")}>Đã xem</button>
+                        <button className="ghost" disabled={a.status === "false_alarm"} onClick={() => setStatus(a.id, "false_alarm")}>Báo giả</button>
                       </div>
                     </li>
                   ))}
@@ -174,7 +176,7 @@ export function Demo() {
           {tab === "members" && (
             <div className="two">
               <div>
-                <h4>Thành viên đã đăng ký</h4>
+                <h3 className="sub-h">Thành viên đã đăng ký</h3>
                 <ul className="cards">
                   {members.map((m) => (
                     <li key={m.name} className="member">
@@ -189,7 +191,7 @@ export function Demo() {
                 <div className="note">Thêm người: tải 5–10 ảnh rõ mặt + xác nhận đồng ý → <span className="mono">worker_face</span> tự đăng ký trong vài giây, không cần gõ lệnh.</div>
               </div>
               <div>
-                <h4>Lịch sử ra vào hôm nay</h4>
+                <h3 className="sub-h">Lịch sử ra vào hôm nay</h3>
                 <table>
                   <thead><tr><th>Giờ</th><th>Người</th><th>Tương đồng</th></tr></thead>
                   <tbody>
@@ -243,7 +245,7 @@ function Objects({ objects, setObjects }: { objects: TrackedObject[]; setObjects
   const valid = vn.trim() && /^[\x20-\x7e]+$/.test(en.trim());
   return (
     <div>
-      <h4>Đồ vật đang theo dõi <small className="muted-txt">— YOLOE-26, đổi danh sách không cần train lại</small></h4>
+      <h3 className="sub-h">Đồ vật đang theo dõi <small className="muted-txt">— YOLOE-26, đổi danh sách không cần train lại</small></h3>
       <div className="obj-grid">
         {objects.map((o, i) => (
           <div key={o.name + i} className={`obj ${o.active ? "" : "off"}`}>
@@ -318,7 +320,7 @@ function Chat({ home, objects, alerts, addObject }: { home: string; objects: Tra
           <div key={i} className={`msg ${m.role}`}>
             <p>{m.text}</p>
             {m.image === "snapshot" ? <div className="mini-feed"><LiveFeed /></div> : m.image && <img src={m.image} alt="" />}
-            {m.tool && m.role === "bot" && <small className="mono">⚙ {m.tool}</small>}
+            {m.tool && m.role === "bot" && <small className="mono">công cụ: {m.tool}</small>}
           </div>
         ))}
         {busy && <div className="msg bot typing"><i /><i /><i /></div>}

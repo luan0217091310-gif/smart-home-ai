@@ -1,9 +1,9 @@
 import { CtaBand, PageHero } from "../Layout";
-import { Icon } from "./Home";
+import { Icon } from "../icons";
 
 const DETAILS = [
   {
-    id: "nguoi-nha", icon: "face", color: "green", title: "Nhận diện người nhà & cảnh báo người lạ",
+    id: "nguoi-nha", icon: "face", title: "Nhận diện người nhà & cảnh báo người lạ",
     lead: "Camera phân biệt thành viên gia đình với người lạ, ghi sổ ra vào và gửi ảnh người lạ qua Telegram.",
     how: [
       "Phát hiện khuôn mặt 3 lần/giây bằng InsightFace (vector 512 chiều).",
@@ -15,7 +15,7 @@ const DETAILS = [
     note: "Chưa chống giả mạo bằng ảnh — không dùng để mở khóa cửa.",
   },
   {
-    id: "do-vat", icon: "target", color: "blue", title: "Ghi nhớ vị trí đồ vật theo vùng",
+    id: "do-vat", icon: "target", title: "Ghi nhớ vị trí đồ vật theo vùng",
     lead: "Camera theo dõi đồ vật bạn chỉ định và nhớ nó nằm ở vùng nào, thấy lần cuối khi nào.",
     how: [
       "Mỗi 4 giây quét khung mới nhất bằng YOLOE-26 với danh sách từ khóa tiếng Anh (cell phone, keys…).",
@@ -27,7 +27,7 @@ const DETAILS = [
     note: "Vật nhỏ ở xa (chìa khóa) khó nhận hơn — có thể dùng luồng camera nét hơn.",
   },
   {
-    id: "te-nga", icon: "alert", color: "red", title: "Phát hiện té ngã",
+    id: "te-nga", icon: "alert", title: "Phát hiện té ngã",
     lead: "Phát hiện người ngã xuống sàn và không dậy, gửi cảnh báo khẩn — không báo khi ngồi, cúi hay nằm nghỉ.",
     how: [
       "Ước lượng tư thế 15 lần/giây bằng YOLO26-pose, theo dấu từng người.",
@@ -39,7 +39,7 @@ const DETAILS = [
     note: "Người quỵ xuống từ từ có thể không qua lớp vận tốc rơi.",
   },
   {
-    id: "tro-ly", icon: "spark", color: "violet", title: "Trợ lý ảo tiếng Việt",
+    id: "tro-ly", icon: "chat", title: "Trợ lý ảo tiếng Việt",
     lead: "Hỏi bằng chữ hoặc giọng nói qua Dashboard và Telegram; trợ lý tra dữ liệu thật rồi trả lời ngắn gọn.",
     how: [
       "Gemini (hoặc Ollama chạy trên máy) gọi 7 công cụ: người ra vào, tìm đồ, thêm/ngừng đồ vật, cảnh báo, chụp ảnh nhà.",
@@ -62,15 +62,15 @@ const EXTRA = [
 export default function Features() {
   return (
     <>
-      <PageHero kicker="Tính năng" title={<>Bốn năng lực AI,<br /><em>một hệ thống gọn nhẹ.</em></>}>
-        Mỗi tính năng trả lời một câu hỏi thật của gia đình — và đều có kiểm thử tự động, ngưỡng chỉnh được trong một file cấu hình.
+      <PageHero kicker="Tính năng" title="Bốn tính năng, mỗi cái trả lời một câu hỏi của gia đình">
+        Mỗi tính năng có kiểm thử tự động. Các ngưỡng nằm trong một file cấu hình, chỉnh được mà không cần sửa code.
       </PageHero>
-      <nav className="jump reveal" aria-label="Đi tới tính năng">
-        {DETAILS.map((d) => <a key={d.id} href={`#${d.id}`} className={d.color}><Icon name={d.icon} />{d.title.split(" &")[0].split(" theo")[0]}</a>)}
+      <nav className="jump" aria-label="Đi tới tính năng">
+        {DETAILS.map((d) => <a key={d.id} href={`#${d.id}`} ><Icon name={d.icon} />{d.title.split(" &")[0].split(" theo")[0]}</a>)}
       </nav>
 
-      {DETAILS.map((d, i) => (
-        <section key={d.id} id={d.id} className={`detail reveal ${d.color} ${i % 2 ? "flip" : ""}`}>
+      {DETAILS.map((d) => (
+        <section key={d.id} id={d.id} className="detail">
           <div className="detail-copy">
             <div className="f-ico"><Icon name={d.icon} /></div>
             <h2>{d.title}</h2>
@@ -79,17 +79,17 @@ export default function Features() {
             <p className="caveat">⚠ {d.note}</p>
           </div>
           <div className="spec-card">
-            <h4>Thông số</h4>
+            <h3 className="sub-h">Thông số</h3>
             <dl>{d.specs.map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}</dl>
           </div>
         </section>
       ))}
 
       <section className="section">
-        <div className="sec-head center reveal"><span className="kicker">Và còn nữa</span><h2>Những thứ chạy ngầm để bạn yên tâm</h2></div>
+        <div className="sec-head"><span className="kicker">Và còn nữa</span><h2>Những thứ chạy ngầm để bạn yên tâm</h2></div>
         <div className="mini-grid">
           {EXTRA.map((e) => (
-            <div key={e.title} className="mini reveal"><div className="f-ico"><Icon name={e.icon} /></div><h3>{e.title}</h3><p>{e.text}</p></div>
+            <div key={e.title} className="mini"><div className="f-ico"><Icon name={e.icon} /></div><h3>{e.title}</h3><p>{e.text}</p></div>
           ))}
         </div>
       </section>

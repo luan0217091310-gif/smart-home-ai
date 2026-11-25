@@ -1,0 +1,15 @@
+{
+  "name": "Camera AI Thông Minh",
+  "short_name": "Camera AI",
+  "description": "Người trông nhà có AI: nhận diện người nhà, báo người lạ, nhớ chỗ để đồ, phát hiện té ngã.",
+  "lang": "vi",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f3f4f2",
+  "theme_color": "#14191b",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

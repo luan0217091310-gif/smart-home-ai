@@ -38,7 +38,7 @@ export default function App() {
     <Layout>
       <Suspense fallback={<div className="page-loading" aria-label="Đang tải"><i /></div>}>
         {Page ? <Page /> : (
-          <PageHero kicker="404" title={<>Trang này <em>không tồn tại.</em></>}>
+          <PageHero kicker="404" title="Không tìm thấy trang này">
             <Link to="/" className="btn">Về trang chủ</Link>
           </PageHero>
         )}
