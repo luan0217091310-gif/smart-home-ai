@@ -1,0 +1,42 @@
+# Ngưỡng và tham số — không chứa bí mật. [ĐỀ XUẤT] là giá trị khởi điểm, hiệu chỉnh bằng dữ liệu thật.
+stream:
+  reconnect_max_backoff_s: 30
+  offline_alert_after_s: 300
+heartbeat_ttl_s: 30
+face:
+  fps: 3
+  match_threshold: 0.55
+  stranger_consecutive_frames: 3
+  member_log_cooldown_s: 120
+  stranger_alert_cooldown_s: 60
+  min_face_size_px: 60
+  track_iou_threshold: 0.3
+  track_max_missed_frames: 6
+  det_size: 640
+object:
+  interval_s: 4
+  min_confidence: 0.25
+  zone_confirm_cycles: 2
+  outside_zone_label: "Ngoài các vùng đã đặt tên"
+  initial_objects:
+    - {vn: "Chìa khóa", en: "keys"}
+    - {vn: "Mắt kính", en: "glasses"}
+    - {vn: "Ví tiền", en: "wallet"}
+fall:
+  fps: 15
+  keypoint_min_conf: 0.5
+  drop_speed_threshold: 0.8      # (chiều cao người)/giây — tạm, đo lại ở GĐ 4
+  drop_window_s: 1.0
+  lying_window_s: 2.0
+  lying_aspect_ratio: 1.2
+  torso_tilt_deg: 60
+  still_seconds: 4
+  still_motion_ratio: 0.08       # dịch chuyển trung bình điểm khớp / chiều cao người
+  alert_cooldown_s: 60
+assistant:
+  recent_hours: 2               # "nãy giờ"
+  default_hours: 24             # "gần đây"
+retention:
+  snapshots_days: 30
+  access_logs_days: 90
+  backup_dir: backups
