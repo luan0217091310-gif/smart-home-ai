@@ -117,11 +117,14 @@ Repo đã có sẵn `vercel.json` và `netlify.toml` nên chỉ cần dán link 
 Chạy thử trên máy: `cd web && npm install && npm run dev` → http://localhost:5173
 
 > Trang web công khai **không** chứa dữ liệu thật và **không** chạy AI (AI cần GPU trong nhà).
-> Muốn trang web hiển thị dữ liệu thật: bấm "Chế độ demo" → nhập địa chỉ `assistant_api`.
-> - Mở trang trên chính máy chủ: nhập `http://localhost:8000`.
-> - Từ xa: dùng Cloudflare Tunnel (`cloudflared tunnel --url http://localhost:8000`) và thêm domain trang web vào
->   `CORS_ORIGINS` trong `.env`. **Cân nhắc kỹ**: việc này mở API của hệ thống camera ra Internet (đặc tả khuyên không làm) —
->   API hiện chưa có đăng nhập, nên chỉ bật tunnel khi cần và tắt ngay sau đó.
+
+**Xem dữ liệu thật trên trang web (chỉ trên máy nhà):**
+1. Bật hệ thống: `powershell -ExecutionPolicy Bypass -File start.ps1`
+2. `cd web && npm install && npm run dev` → mở http://localhost:5173
+3. Bấm "Chế độ demo" → nhập `/home-api` → Lưu. Tab Live hiện ảnh camera thật, tab Trợ lý hỏi hệ thống thật.
+
+`/home-api` được Vite chuyển tiếp nội bộ tới `assistant_api` (cổng 8000), nên không cần mở CORS và không mở gì ra Internet.
+Bản deploy trên Vercel **không** nối được với máy nhà — cố ý, vì API camera chưa có đăng nhập.
 
 ## Nâng cấp sau này
 

@@ -293,12 +293,12 @@ function ConnectPanel({ value, state, info, onSave }: { value: string; state: st
     <div className="connect">
       <div>
         <b>Kết nối máy chủ trong nhà</b>
-        <p>Nhập địa chỉ <span className="mono">assistant_api</span> (vd. <span className="mono">http://localhost:8000</span> khi mở trên chính máy đó, hoặc link Cloudflare Tunnel). Địa chỉ chỉ lưu trong trình duyệt của bạn.</p>
-        {state === "error" && <p className="err">Không kết nối được ({info}). Kiểm tra máy nhà đang chạy và đã thêm domain này vào <span className="mono">CORS_ORIGINS</span>.</p>}
+        <p>Mở trang này <b>trên chính máy nhà</b> bằng <span className="mono">cd web &amp;&amp; npm run dev</span> (http://localhost:5173), rồi nhập <span className="mono">/home-api</span>. Địa chỉ chỉ lưu trong trình duyệt của bạn.</p>
+        {state === "error" && <p className="err">Không kết nối được ({info}). Kiểm tra: hệ thống đã bật (<span className="mono">start.ps1</span>) và bạn đang mở trang tại localhost:5173, không phải bản trên Internet.</p>}
         {state === "ok" && <p className="okk">Đã kết nối · {info}. Tab Live hiện ảnh thật, tab Trợ lý hỏi hệ thống thật.</p>}
       </div>
       <form onSubmit={(e) => { e.preventDefault(); onSave(v); }}>
-        <input value={v} onChange={(e) => setV(e.target.value)} placeholder="http://localhost:8000" />
+        <input value={v} onChange={(e) => setV(e.target.value)} placeholder="/home-api" />
         <button className="primary">Lưu</button>
         {value && <button type="button" className="ghost" onClick={() => { setV(""); onSave(""); }}>Về demo</button>}
       </form>
