@@ -4,6 +4,22 @@ Biến một camera thường thành "người trông nhà" có AI: **nhận ra 
 
 - Đặc tả đầy đủ: [docs/SPEC.md](docs/SPEC.md) · Biên bản nghiệm thu: [docs/acceptance/](docs/acceptance/)
 
+## Bắt đầu nhanh (Windows, máy hiện tại)
+
+```powershell
+cd D:\Camera-AI
+powershell -ExecutionPolicy Bypass -File start.ps1          # bật toàn bộ (Docker + đọc webcam)
+powershell -ExecutionPolicy Bypass -File start.ps1 -Stop    # tắt
+```
+
+- Dashboard: http://localhost:8501 (mật khẩu trong `.env` → `DASHBOARD_PASSWORD`)
+- Ảnh nhà hiện tại: http://localhost:8000/snapshot
+- Cảnh báo người lạ / té ngã / mất camera tự gửi vào Telegram.
+- Hỏi trợ lý: tab 💬 Trò chuyện, ví dụ "Nãy giờ có ai vào nhà không?", "Điện thoại của tôi đâu?", "Chụp ảnh nhà hiện tại".
+- Thêm khuôn mặt: tab 👪 Thành viên, hoặc bỏ ảnh vào `data/faces/<tên>/` rồi
+  `docker compose run --rm worker_face python scripts/enroll_faces.py`
+  (**không** chạy script đụng CSDL trực tiếp trên Windows khi hệ thống đang chạy — xem "Lỗi thường gặp").
+
 ## Kiến trúc
 
 ```
@@ -90,7 +106,62 @@ Ngưỡng (nhận mặt, cooldown, té ngã…) nằm trong `config/settings.yam
 | Dọn dữ liệu + sao lưu ngay | `python scripts/maintenance.py --once` (service `maintenance` tự chạy 02:00 mỗi đêm, sao lưu Chủ nhật vào `backups/`) |
 | Kiểm thử | `python -m pytest -q` |
 
+## Nâng cấp sau này
+
+### A. Thay webcam bằng camera IP (Tapo, Imou, Ezviz, Hikvision…)
+
+Không sửa code — chỉ sửa `.env`. Điều kiện: camera **hỗ trợ RTSP/ONVIF**.
+
+| Hãng | Dùng được | Ghi chú |
+| --- | --- | --- |
+| TP-Link Tapo (C200, C210, C220, C310…) | ✅ dễ nhất | App Tapo → Cài đặt nâng cao → Tài khoản camera; link `rtsp://user:pass@IP:554/stream1` (nét) hoặc `/stream2` (nhẹ) |
+| Imou | ✅ phần lớn | `rtsp://admin:<mã an toàn>@IP:554/cam/realmonitor?channel=1&subtype=1` |
+| Ezviz | ✅ | Mật khẩu RTSP = mã xác minh dưới đáy camera; `rtsp://admin:<mã>@IP:554/H.264` |
+| Hikvision / Dahua / KBVision | ✅ rất tốt | Camera an ninh chuyên dụng |
+| Xiaomi / Mi Home | ⚠️ đa số không | Thường không có RTSP |
+| Camera dùng pin (mọi hãng) | ❌ | Hầu hết không có RTSP |
+
+Trước khi mua: tìm "<tên model> RTSP".
+
+Các bước:
+1. Cài camera bằng app hãng, bật RTSP, tạo tài khoản RTSP riêng; đặt IP cố định cho camera trong router.
+2. Mở link bằng VLC (Media → Open Network Stream) — thấy hình mới làm tiếp.
+3. Sửa `.env`:
+   ```
+   CAMERA_ID=cam_phongkhach
+   CAMERA_SOURCE=rtsp://user:matkhau@192.168.1.50:554/stream2
+   ```
+4. Camera IP không cần chạy producer trên Windows: bật luôn trong Docker  
+   `docker compose up -d` (gồm cả `stream_producer`) và **không** chạy `start.ps1` phần webcam.
+5. Chụp ảnh tĩnh mới `python scripts/view_stream.py --snapshot`, vẽ lại vùng `python scripts/draw_zones.py`.
+6. Lấy mẫu mặt từ camera mới:  
+   `docker compose run --rm worker_face python scripts/capture_faces.py --name "<Tên>" --role owner`
+7. Kiểm tra lại ngưỡng mặt (ngày + đêm) từ `data/face_scores.csv`, thử vài cảnh ngã, chạy thử 72 giờ — mẫu biên bản ở `docs/acceptance/phase-7.md`.
+
+Mẹo: thử luồng nhẹ (`stream2`) trước; nếu mặt ở xa nhỏ hơn 60 px thì đổi sang `stream1`. Camera giới hạn số người xem cùng lúc — tắt bớt app điện thoại nếu mất hình.
+
+### B. Nhiều camera
+
+Hiện chạy **1 camera** (phạm vi bản test). Mọi khung hình, bảng CSDL và khóa Redis đã có `camera_id`, nên mở rộng chỉ cần: một `stream_producer` cho mỗi camera và cho các worker đọc danh sách camera. Việc này chưa làm. GPU 4 GB chịu được khoảng 1–2 camera; nhiều hơn cần GPU mạnh hơn hoặc giảm FPS mỗi camera.
+
+### C. Hỏi trợ lý ngay trong Telegram
+
+Bot Telegram có sẵn đang nhận tin bằng long polling, nên hệ thống camera chỉ **gửi cảnh báo** qua bot đó (`TELEGRAM_BOT_ENABLED=false`). Để hỏi đáp/`/chup`/tin nhắn thoại trong Telegram:
+1. Tạo bot mới: nhắn `/newbot` cho @BotFather.
+2. Trong `.env`: `TELEGRAM_BOT_TOKEN=<token mới>`, `TELEGRAM_BOT_ENABLED=true`.
+3. `docker compose up -d --force-recreate assistant_api`.
+
+### D. Khác
+
+- Giọng nói: `VOICE_ENABLED=true`, chọn `TTS_VOICE`.
+- Riêng tư hoàn toàn: `LLM_PROVIDER=ollama` (cần GPU nhiều VRAM hơn).
+- Đồ vật: thêm/ngừng trong tab Đồ vật hoặc nhắn trợ lý "theo dõi thêm cái …" — không cần train lại.
+- Ngưỡng té ngã: quay video vào `data/test_videos/fall/` và `normal/`, chạy `docker compose run --rm worker_fall python scripts/eval_fall_videos.py`, sửa `fall.drop_speed_threshold` trong `config/settings.yaml`.
+
 ## Lỗi thường gặp
+
+- **Mất dữ liệu / `unable to open database file`**: trên Windows + Docker Desktop, SQLite không được mở cùng lúc từ Windows và từ container. Script đụng CSDL phải chạy trong container (`docker compose run --rm worker_face python scripts/...`). Nếu đã lỡ: `docker compose stop` rồi `docker compose up -d`.
+- **Hình trên Dashboard đứng yên**: chương trình đọc webcam đã tắt → chạy lại `start.ps1`.
 
 - **Không có hình**: `python scripts/check_camera.py`; với RTSP thử mở bằng VLC trước; camera có thể giới hạn số luồng xem cùng lúc.
 - **`database is locked`**: đã bật WAL + `busy_timeout`; đừng mở file DB bằng công cụ ghi khi hệ thống đang chạy.
