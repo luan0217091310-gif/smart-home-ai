@@ -68,5 +68,25 @@ services:
       retries: 3
       start_period: 180s
 
+  worker_object:
+    <<: [*common, *gpu]
+    build: {context: ., dockerfile: services/worker_object/Dockerfile}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import redis,os;r=redis.Redis.from_url(os.environ['REDIS_URL']);exit(0 if r.get('heartbeat:worker_object') else 1)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 180s
+
+  worker_fall:
+    <<: [*common, *gpu]
+    build: {context: ., dockerfile: services/worker_fall/Dockerfile}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import redis,os;r=redis.Redis.from_url(os.environ['REDIS_URL']);exit(0 if r.get('heartbeat:worker_fall') else 1)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 180s
+
 networks:
   smarthome: {}
