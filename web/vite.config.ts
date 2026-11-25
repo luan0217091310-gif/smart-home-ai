@@ -7,6 +7,8 @@ const homeApi = { "/home-api": { target: "http://localhost:8000", changeOrigin: 
 
 export default defineConfig({
   plugins: [react()],
+  // Không nhúng font thành data: URI — để CSP chặt (font-src 'self') không chặn và trình duyệt cache được font.
+  build: { assetsInlineLimit: (file: string) => (/\.woff2?$/.test(file) ? false : undefined) },
   server: { proxy: homeApi },
   preview: { proxy: homeApi },
 });

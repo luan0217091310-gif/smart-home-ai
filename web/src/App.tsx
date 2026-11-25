@@ -31,6 +31,10 @@ export default function App() {
   useEffect(() => {
     document.title = route?.title ?? "Không tìm thấy · Camera AI Thông Minh";
     document.querySelector('meta[name="description"]')?.setAttribute("content", route?.desc ?? "");
+    const url = location.origin + (path === "/" ? "/" : path);
+    document.querySelector('link[rel="canonical"]')?.setAttribute("href", url);
+    document.querySelector('meta[property="og:url"]')?.setAttribute("content", url);
+    document.querySelector('meta[property="og:title"]')?.setAttribute("content", route?.title ?? "Camera AI Thông Minh");
     if (location.hash) setTimeout(() => document.querySelector(location.hash)?.scrollIntoView({ behavior: "smooth" }), 120);
   }, [path, route]);
   const Page = route?.el;

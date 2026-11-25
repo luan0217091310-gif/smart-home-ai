@@ -413,7 +413,7 @@ input::placeholder { color: var(--muted); }
 .toast.warn { border-left-color: var(--warn); }
 .toast.danger { border-left-color: var(--bad); }
 @keyframes toastIn { from { opacity: 0; transform: translateY(10px); } }
-.page-loading { display: grid; place-items: center; min-height: 50vh; }
+.page-loading { display: grid; place-items: center; min-height: 100vh; } /* giữ chân trang dưới mép màn hình khi trang con đang tải → không xô lệch */
 .page-loading i { width: 26px; height: 26px; border-radius: 50%; border: 3px solid var(--line); border-top-color: var(--accent); animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
