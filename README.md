@@ -106,6 +106,23 @@ Ngưỡng (nhận mặt, cooldown, té ngã…) nằm trong `config/settings.yam
 | Dọn dữ liệu + sao lưu ngay | `python scripts/maintenance.py --once` (service `maintenance` tự chạy 02:00 mỗi đêm, sao lưu Chủ nhật vào `backups/`) |
 | Kiểm thử | `python -m pytest -q` |
 
+## Trang web giới thiệu + demo (deploy lên Internet)
+
+Thư mục `web/` là trang web React + Vite (giới thiệu dự án, Dashboard demo tương tác chạy bằng **dữ liệu mẫu**, trợ lý demo).
+Repo đã có sẵn `vercel.json` và `netlify.toml` nên chỉ cần dán link GitHub:
+
+**Vercel:** vercel.com → Add New → Project → Import `luan0217091310-gif/smart-home-ai` → Deploy (không cần chỉnh gì).  
+**Netlify:** app.netlify.com → Add new site → Import from Git → chọn repo → Deploy.
+
+Chạy thử trên máy: `cd web && npm install && npm run dev` → http://localhost:5173
+
+> Trang web công khai **không** chứa dữ liệu thật và **không** chạy AI (AI cần GPU trong nhà).
+> Muốn trang web hiển thị dữ liệu thật: bấm "Chế độ demo" → nhập địa chỉ `assistant_api`.
+> - Mở trang trên chính máy chủ: nhập `http://localhost:8000`.
+> - Từ xa: dùng Cloudflare Tunnel (`cloudflared tunnel --url http://localhost:8000`) và thêm domain trang web vào
+>   `CORS_ORIGINS` trong `.env`. **Cân nhắc kỹ**: việc này mở API của hệ thống camera ra Internet (đặc tả khuyên không làm) —
+>   API hiện chưa có đăng nhập, nên chỉ bật tunnel khi cần và tắt ngay sau đó.
+
 ## Nâng cấp sau này
 
 ### A. Thay webcam bằng camera IP (Tapo, Imou, Ezviz, Hikvision…)

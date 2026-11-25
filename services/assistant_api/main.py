@@ -20,7 +20,7 @@ from services.assistant_api import voice  # noqa: E402
 from services.assistant_api.agent import Agent  # noqa: E402
 from services.assistant_api.telegram_bot import TelegramBot  # noqa: E402
 from services.assistant_api.tools import Tools  # noqa: E402
-from shared.config import data_dir, env_bool, setup_logging  # noqa: E402
+from shared.config import data_dir, env, env_bool, setup_logging  # noqa: E402
 from shared.database import DB  # noqa: E402
 from shared.frame_bus import FrameBus  # noqa: E402
 
@@ -41,6 +41,12 @@ def _make_bus():
 db, bus = DB(), _make_bus()
 agent = Agent(Tools(db, bus))
 app = FastAPI(title="smart-home-ai assistant")
+
+# Cho phép trang web (vd. Vercel) gọi API máy nhà. Danh sách domain trong CORS_ORIGINS, cách nhau dấu phẩy.
+_origins = [o.strip() for o in (env("CORS_ORIGINS") or "").split(",") if o.strip()]
+if _origins:
+    from fastapi.middleware.cors import CORSMiddleware
+    app.add_middleware(CORSMiddleware, allow_origins=_origins, allow_methods=["GET", "POST"], allow_headers=["Content-Type"])
 
 
 class ChatIn(BaseModel):
