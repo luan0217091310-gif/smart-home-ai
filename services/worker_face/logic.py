@@ -57,10 +57,11 @@ class Decision:
 class FaceDecider:
     """Theo dấu mặt qua các khung bằng IoU và áp quy tắc:
     - score ≥ threshold → member (reset bộ đếm dưới ngưỡng).
-    - score < threshold `stranger_frames` khung liên tiếp (cùng track) → stranger (1 lần / track).
-    - còn lại → undecided.
+    - score < stranger_threshold `stranger_frames` khung liên tiếp (cùng track) → stranger (1 lần / track).
+    - ở giữa hai ngưỡng (quay đầu, đi xa, mờ) → undecided và reset bộ đếm: không kết luận.
     """
     threshold: float = 0.55
+    stranger_threshold: float | None = None   # None = bằng threshold (hành vi 2 vùng cũ)
     stranger_frames: int = 3
     iou_threshold: float = 0.3
     max_missed: int = 6
@@ -100,6 +101,11 @@ class FaceDecider:
             if idx >= 0 and score >= self.threshold:
                 t.below_count, t.stranger_reported = 0, False
                 out.append(Decision("member", tid, idx, score, bbox))
+                continue
+            st = self.threshold if self.stranger_threshold is None else self.stranger_threshold
+            if score >= st:
+                t.below_count = 0
+                out.append(Decision("undecided", tid, idx, score, bbox))
                 continue
             t.below_count += 1
             if t.below_count >= self.stranger_frames and not t.stranger_reported:

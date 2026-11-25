@@ -11,12 +11,14 @@ from shared.database import DB, STRANGER
 
 def seed_demo(db: DB) -> dict:
     n = now()
+    today = n.replace(hour=0, minute=0, second=0, microsecond=0)
+    recent = max(n - timedelta(minutes=30), today + (n - today) / 2)  # luôn thuộc "hôm nay", kể cả lúc 0h05
     bo = db.upsert_member("Bố", np.ones(512, np.float32) / np.sqrt(512), 8, "owner")
     me = db.upsert_member("Mẹ", -np.ones(512, np.float32) / np.sqrt(512), 7, "family")
     db.add_access_log("cam_test", bo.id, "Bố", 0.71, ts=n - timedelta(minutes=50))
     db.add_access_log("cam_test", me.id, "Mẹ", 0.66, ts=n - timedelta(hours=5))
-    db.add_access_log("cam_test", None, STRANGER, 0.21, ts=n - timedelta(minutes=30))
-    db.add_alert("cam_test", "stranger", "Cảnh báo: phát hiện người lạ", None, "sent", n - timedelta(minutes=30))
+    db.add_access_log("cam_test", None, STRANGER, 0.21, ts=recent)
+    db.add_alert("cam_test", "stranger", "Cảnh báo: phát hiện người lạ", None, "sent", recent)
     db.add_alert("cam_test", "fall", "KHẨN: té ngã (diễn thử)", None, "false_alarm", n - timedelta(days=2))
     keys, _ = db.add_object("Chìa khóa", "keys")
     db.add_object("Mắt kính", "glasses")

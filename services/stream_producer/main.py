@@ -12,7 +12,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from services.stream_producer.capture import LatestGrabber, backoff_delay, mask_source, resize_to_width  # noqa: E402
 from shared.config import camera_id, env, env_int, settings, setup_logging  # noqa: E402
-from shared.database import DB  # noqa: E402
 from shared.frame_bus import FrameBus, run_at_fps  # noqa: E402
 from shared.notifier import Notifier  # noqa: E402
 
@@ -50,7 +49,7 @@ def main() -> None:
     fps = env_int("STREAM_FPS", 15)
     width = env_int("STREAM_WIDTH", 1280)
     cfg = settings().get("stream", {})
-    bus, notifier, db = FrameBus(), Notifier(), DB()
+    bus, notifier = FrameBus(), Notifier()
     tracker = OfflineTracker(cfg.get("offline_alert_after_s", 300))
     max_backoff = cfg.get("reconnect_max_backoff_s", 30)
     log.info("Khởi động camera_id=%s nguồn=%s fps=%s width=%s", cam, mask_source(src), fps, width)
@@ -64,7 +63,7 @@ def main() -> None:
             log.warning("Không mở được camera, thử lại sau %.0fs (lần %d)", delay, attempt + 1)
             if tracker.mark_lost(time.time()):
                 msg = f"⚠️ Mất kết nối camera {cam} quá {tracker.alert_after_s // 60:.0f} phút"
-                db.add_alert(cam, "system", msg, status="sent")
+                bus.push_alert(cam, "system", msg, "sent")  # assistant_api ghi vào CSDL
                 notifier.alert(f"system:{cam}", 600, msg)
             bus.heartbeat(SERVICE)
             time.sleep(delay)

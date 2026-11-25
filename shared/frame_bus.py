@@ -73,6 +73,19 @@ class FrameBus:
     def bump_objects_version(self) -> int:
         return int(self.r.incr("objects:version"))
 
+    # cảnh báo từ tiến trình không được mở CSDL (producer trên Windows) → assistant_api ghi vào CSDL
+    def push_alert(self, camera_id: str, alert_type: str, message: str, status: str = "new") -> None:
+        import json
+        self.r.rpush("alerts:pending", json.dumps({"camera_id": camera_id, "alert_type": alert_type,
+                                                   "message": message, "status": status, "ts": time.time()}))
+
+    def pop_alerts(self) -> list[dict]:
+        import json
+        out = []
+        while (v := self.r.lpop("alerts:pending")) is not None:
+            out.append(json.loads(v))
+        return out
+
     # members:version — worker_face nạp lại thành viên; faces:enroll_queue — tên thành viên cần đăng ký lại
     def members_version(self) -> int:
         v = self.r.get("members:version")

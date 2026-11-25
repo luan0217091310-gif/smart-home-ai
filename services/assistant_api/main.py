@@ -57,6 +57,11 @@ def _startup() -> None:
             while True:
                 try:
                     bus.heartbeat(SERVICE)
+                    for a in bus.pop_alerts():
+                        from datetime import datetime
+                        from shared.config import TZ
+                        ts = datetime.fromtimestamp(a["ts"], TZ).replace(tzinfo=None)
+                        db.add_alert(a["camera_id"], a["alert_type"], a["message"], status=a["status"], ts=ts)
                 except Exception:  # noqa: BLE001
                     pass
                 time.sleep(10)

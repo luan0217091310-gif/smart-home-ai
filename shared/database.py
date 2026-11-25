@@ -105,10 +105,32 @@ def table_names(url: str | None = None) -> list[str]:
     return sorted(inspect(get_engine(url)).get_table_names())
 
 
+class HostDBError(RuntimeError):
+    pass
+
+
+def guard_host_access(url: str) -> None:
+    """Docker Desktop (Windows): SQLite WAL KHÔNG an toàn khi Windows và container cùng mở một file qua bind mount
+    (file -shm/-wal lệch nhau → mất dữ liệu). Chặn tiến trình Windows mở CSDL thật, trừ khi ALLOW_HOST_DB=1
+    (chỉ dùng khi mọi container đã dừng)."""
+    import os
+    from pathlib import Path
+    if os.name != "nt" or env("ALLOW_HOST_DB") == "1" or not url.startswith("sqlite"):
+        return
+    target = Path(url.split(":///", 1)[-1])
+    if not target.is_absolute():
+        from shared.config import ROOT
+        target = ROOT / target
+    if target.resolve() == (data_dir() / "smarthome.db").resolve():
+        raise HostDBError("Không mở CSDL thật từ Windows khi hệ thống chạy trong Docker. Chạy script trong container, vd.: "
+                          "docker compose run --rm worker_face python scripts/enroll_faces.py")
+
+
 class DB:
     """Các thao tác ghi/đọc thường dùng; mỗi hàm là một giao dịch ngắn."""
 
     def __init__(self, url: str | None = None):
+        guard_host_access(url or default_url())
         self.engine = get_engine(url)
         self.Session = sessionmaker(bind=self.engine, expire_on_commit=False, future=True)
 

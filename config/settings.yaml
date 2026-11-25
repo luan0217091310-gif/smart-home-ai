@@ -5,7 +5,8 @@ stream:
 heartbeat_ttl_s: 30
 face:
   fps: 3
-  match_threshold: 0.55
+  match_threshold: 0.45          # đo 26/11: chủ nhà median 0,51, max 0,66 (webcam, 11 ảnh mẫu)
+  stranger_threshold: 0.25       # dưới mức này 3 khung liên tiếp mới là người lạ; chủ nhà quay đầu thấp nhất 0,26
   stranger_consecutive_frames: 3
   member_log_cooldown_s: 120
   stranger_alert_cooldown_s: 60
@@ -19,9 +20,7 @@ object:
   zone_confirm_cycles: 2
   outside_zone_label: "Ngoài các vùng đã đặt tên"
   initial_objects:
-    - {vn: "Chìa khóa", en: "keys"}
-    - {vn: "Mắt kính", en: "glasses"}
-    - {vn: "Ví tiền", en: "wallet"}
+    - {vn: "Điện thoại", en: "cell phone"}
 fall:
   fps: 15
   keypoint_min_conf: 0.5

@@ -44,6 +44,7 @@ def main() -> None:
     gallery = Gallery(db)
     members_ver = bus.members_version()
     decider = FaceDecider(threshold=cfg.get("match_threshold", 0.55),
+                          stranger_threshold=cfg.get("stranger_threshold"),
                           stranger_frames=cfg.get("stranger_consecutive_frames", 3),
                           iou_threshold=cfg.get("track_iou_threshold", 0.3),
                           max_missed=cfg.get("track_max_missed_frames", 6))

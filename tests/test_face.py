@@ -70,3 +70,12 @@ def test_track_expires_after_missed_frames():
 
 def test_face_size():
     assert face_big_enough((0, 0, 60, 80), 60) and not face_big_enough((0, 0, 59, 80), 60)
+
+
+def test_middle_band_is_undecided_not_stranger():
+    """Chủ nhà quay đầu: điểm 0,26–0,38 nhiều khung liền → không được báo người lạ."""
+    d = FaceDecider(threshold=0.45, stranger_threshold=0.25, stranger_frames=3)
+    kinds = [d.update([((0, 0, 100, 100), 0, s)])[0].kind for s in [0.33, 0.30, 0.28, 0.26, 0.35, 0.38]]
+    assert "stranger" not in kinds
+    kinds = [d.update([((0, 0, 100, 100), 0, s)])[0].kind for s in [0.1, 0.12, 0.08]]
+    assert kinds[-1] == "stranger"

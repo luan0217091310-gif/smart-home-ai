@@ -94,3 +94,22 @@ def test_zones_smallest_wins(db):
     assert zm.find_zone_px(960, 400, 1280, 720).name == "Ghế sofa"
     zm.sync_to_db(db)
     assert len(db.list_zones("cam_test")) == 3
+
+
+def test_pending_alerts_roundtrip(bus):
+    bus.push_alert("cam_test", "system", "mất camera", "sent")
+    a = bus.pop_alerts()
+    assert a[0]["message"] == "mất camera" and bus.pop_alerts() == []
+
+
+def test_host_guard_blocks_real_db_on_windows(monkeypatch):
+    import os
+    import pytest
+    from shared.config import data_dir
+    from shared.database import HostDBError, guard_host_access
+    monkeypatch.delenv("ALLOW_HOST_DB", raising=False)
+    real = f"sqlite:///{(data_dir() / 'smarthome.db').as_posix()}"
+    if os.name == "nt":
+        with pytest.raises(HostDBError):
+            guard_host_access(real)
+    guard_host_access("sqlite:///C:/tmp/other.db")  # CSDL khác thì được
