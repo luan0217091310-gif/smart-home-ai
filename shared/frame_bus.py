@@ -73,6 +73,24 @@ class FrameBus:
     def bump_objects_version(self) -> int:
         return int(self.r.incr("objects:version"))
 
+    # members:version — worker_face nạp lại thành viên; faces:enroll_queue — tên thành viên cần đăng ký lại
+    def members_version(self) -> int:
+        v = self.r.get("members:version")
+        return int(v) if v else 0
+
+    def bump_members_version(self) -> int:
+        return int(self.r.incr("members:version"))
+
+    def request_enroll(self, name: str, role: str = "family") -> None:
+        self.r.rpush("faces:enroll_queue", f"{name}|{role}")
+
+    def pop_enroll_request(self) -> tuple[str, str] | None:
+        v = self.r.lpop("faces:enroll_queue")
+        if not v:
+            return None
+        name, _, role = v.decode().partition("|")
+        return name, role or "family"
+
 
 class LatestFrameReader:
     """Cho worker: chỉ trả khung MỚI, bỏ qua nếu frame_id trùng lần trước. Không bao giờ xếp hàng."""

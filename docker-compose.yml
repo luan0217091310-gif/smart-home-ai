@@ -58,5 +58,15 @@ services:
       retries: 3
       start_period: 60s
 
+  worker_face:
+    <<: [*common, *gpu]
+    build: {context: ., dockerfile: services/worker_face/Dockerfile}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import redis,os;r=redis.Redis.from_url(os.environ['REDIS_URL']);exit(0 if r.get('heartbeat:worker_face') else 1)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 180s
+
 networks:
   smarthome: {}
