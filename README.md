@@ -112,6 +112,7 @@ Thư mục `web/` là trang web React + Vite (giới thiệu dự án, Dashboard
 Repo đã có sẵn `vercel.json` và `netlify.toml` nên chỉ cần dán link GitHub:
 
 **Vercel:** vercel.com → Add New → Project → Import `luan0217091310-gif/smart-home-ai` → Deploy (không cần chỉnh gì).  
+**Cloudflare Workers (đang dùng):** https://smart-home-ai.luan0017091310.workers.dev — Workers & Pages → Create → Import a repository → chọn repo → Deploy. File `wrangler.jsonc` tự build `web/` và phục vụ `web/dist`; mỗi lần push lên `main` Cloudflare tự deploy lại.  
 **Netlify:** app.netlify.com → Add new site → Import from Git → chọn repo → Deploy.
 
 Chạy thử trên máy: `cd web && npm install && npm run dev` → http://localhost:5173
