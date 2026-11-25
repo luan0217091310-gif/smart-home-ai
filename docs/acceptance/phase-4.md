@@ -25,6 +25,8 @@ Ngày: 25/11/2026
 | Nằm nhưng còn cử động | Chỉ báo sau khi đứng yên đủ 4 s |
 | Mất khung trong lúc ngã | Vẫn tính đúng theo `ts` |
 
+worker_fall chạy thật trong Docker (GPU) với webcam: nạp `yolo26n-pose.pt`, theo dấu người, healthy; không báo nhầm trong thời gian chạy thử (người ngồi trong quán).
+
 `drop_speed_threshold` tạm đặt **0,8 chiều cao người/giây** — phải hiệu chỉnh bằng video thật.
 
 ## Nghiệm thu — cần chủ dự án

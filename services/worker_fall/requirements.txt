@@ -3,3 +3,5 @@
 torch>=2.6,<3
 torchvision
 ultralytics~=8.4.0
+lap==0.5.14
+clip @ git+https://github.com/ultralytics/CLIP.git

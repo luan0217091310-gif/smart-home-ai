@@ -19,6 +19,8 @@ Ngày: 25/11/2026
 | --- | --- |
 | pytest (vùng nhỏ nhất, chống nhảy vùng, lọc độ tin cậy, nạp nóng) | đạt |
 | Ảnh tô vùng mẫu | `data/zones_preview.jpg` tạo được |
+| Chạy thật trong Docker (GPU) trên ảnh webcam, từ khóa `chair, person, laptop, cup` | Nhận `person` 0,51 · `laptop` 0,45 · `chair` 0,35 → vùng "Bàn làm việc" · `cup` 0,30 |
+| worker_object trong Docker | healthy, nạp `yoloe-26s-seg.pt` + bộ mã hóa chữ vào `models/` |
 
 **[LƯU Ý]** Trên máy này PyTorch bị **Windows Application Control (Smart App Control)** chặn nạp DLL, nên YOLO chỉ chạy trong Docker (image `worker_object`, `worker_fall`).
 

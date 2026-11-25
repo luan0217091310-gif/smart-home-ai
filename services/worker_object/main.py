@@ -23,11 +23,14 @@ log = setup_logging(SERVICE)
 
 
 def seed_initial_objects(db: DB, cfg: dict) -> None:
-    if db.all_objects():
-        return
+    """Thêm các đồ vật ban đầu CHƯA TỪNG có trong bảng (không bật lại đồ vật người dùng đã ngừng)."""
+    known = {o.prompt_keyword.lower() for o in db.all_objects()}
+    added = [o["en"] for o in cfg.get("initial_objects", []) if o["en"].lower() not in known]
     for o in cfg.get("initial_objects", []):
-        db.add_object(o["vn"], o["en"])
-    log.info("Đã nạp danh sách đồ vật ban đầu")
+        if o["en"] in added:
+            db.add_object(o["vn"], o["en"])
+    if added:
+        log.info("Đã nạp đồ vật ban đầu: %s", ", ".join(added))
 
 
 def main() -> None:
