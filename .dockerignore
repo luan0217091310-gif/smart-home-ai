@@ -1,0 +1,14 @@
+# Không gửi những thứ này vào Docker khi build: chậm, nặng và có dữ liệu riêng tư (ảnh khuôn mặt, .env)
+.git
+.venv
+.env
+data
+models
+backups
+web
+docs
+tests
+**/__pycache__
+**/*.pyc
+.pytest_cache
+*.md

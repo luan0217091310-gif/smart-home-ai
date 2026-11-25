@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { chat, getHomeUrl, health, imageUrl, setHomeUrl, snapshotUrl } from "./api";
 import { accessLog, ago, initialAlerts, initialObjects, members, SERVICES, type Alert, type TrackedObject } from "./data";
 import { demoAnswer } from "./demoAssistant";
@@ -19,6 +20,8 @@ const ALERT_META = {
 const STATUS_VN = { new: "Mới", sent: "Đã gửi", acknowledged: "Đã xem", false_alarm: "Báo giả" };
 
 interface Msg { role: "user" | "bot"; text: string; image?: string; tool?: string }
+interface Toast { id: number; tone: "warn" | "danger" | "info"; title: string; body: string }
+type SimKind = "stranger" | "fall" | "phone";
 
 export function Demo() {
   const [tab, setTab] = useState<Tab>("live");
@@ -60,6 +63,32 @@ export function Demo() {
   const setStatus = (id: number, status: Alert["status"]) =>
     setAlerts((xs) => xs.map((a) => (a.id === id ? { ...a, status } : a)));
 
+  // ---- Mô phỏng sự kiện + thông báo bật lên (chỉ ở chế độ demo)
+  const [toasts, setToasts] = useState<Toast[]>([]);
+  const [flash, setFlash] = useState<"" | "warn" | "danger" | "info">("");
+  const pushToast = (t: Omit<Toast, "id">) => {
+    const id = Date.now() + Math.random();
+    setToasts((xs) => [...xs.slice(-2), { ...t, id }]);
+    setTimeout(() => setToasts((xs) => xs.filter((x) => x.id !== id)), 4800);
+  };
+  const simulate = (kind: SimKind) => {
+    const now = new Date().toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    if (kind === "phone") {
+      const zones = ["Bàn làm việc", "Ghế sofa", "Kệ cửa ra vào", "Bàn ăn"];
+      const zone = zones[Math.floor(Math.random() * zones.length)];
+      setObjects((xs) => xs.map((o) => (o.keyword === "cell phone" ? { ...o, zone, lastSeenMin: 0, confidence: 0.6 + Math.random() * 0.3 } : o)));
+      setFlash("info");
+      pushToast({ tone: "info", title: "Đã cập nhật vị trí", body: `Điện thoại → ${zone} lúc ${now}` });
+    } else {
+      const fall = kind === "fall";
+      const message = fall ? "KHẨN: người té ngã và nằm yên ở phòng khách" : `Phát hiện người lạ ở cửa chính (độ tương đồng ${(Math.random() * 0.2).toFixed(2)})`;
+      setAlerts((xs) => [{ id: Math.max(0, ...xs.map((a) => a.id)) + 1, type: fall ? "fall" : "stranger", message, minutesAgo: 0, status: "sent" }, ...xs]);
+      setFlash(fall ? "danger" : "warn");
+      pushToast({ tone: fall ? "danger" : "warn", title: fall ? "🆘 Telegram · Cảnh báo khẩn" : "🚨 Telegram · Người lạ", body: `${message} — ${now}` });
+    }
+    setTimeout(() => setFlash(""), 1600);
+  };
+
   return (
     <div className="demo" id="demo">
       <div className="demo-bar">
@@ -95,7 +124,15 @@ export function Demo() {
           {tab === "live" && (
             <div className="live-grid">
               <div>
-                <LiveFeed snapshotSrc={snap} />
+                <div className={`feed-wrap ${flash}`}><LiveFeed snapshotSrc={snap} /></div>
+                {homeState !== "ok" && (
+                  <div className="sim" role="group" aria-label="Mô phỏng sự kiện">
+                    <span>Mô phỏng:</span>
+                    <button className="ghost" onClick={() => simulate("stranger")}>🚨 Người lạ</button>
+                    <button className="ghost" onClick={() => simulate("fall")}>🆘 Té ngã</button>
+                    <button className="ghost" onClick={() => simulate("phone")}>📱 Thấy điện thoại</button>
+                  </div>
+                )}
                 <div className="stats">
                   <Stat n={String(counts.today)} label="Cảnh báo hôm nay" />
                   <Stat n={String(members.length)} label="Thành viên" />
@@ -177,6 +214,14 @@ export function Demo() {
           )}
         </section>
       </div>
+      {createPortal(
+        <div className="toasts" role="status" aria-live="polite">
+          {toasts.map((t) => (
+            <div key={t.id} className={`toast ${t.tone}`}><b>{t.title}</b><span>{t.body}</span></div>
+          ))}
+        </div>,
+        document.body,
+      )}
     </div>
   );
 }
@@ -240,7 +285,10 @@ function Chat({ home, objects, alerts, addObject }: { home: string; objects: Tra
   const [q, setQ] = useState("");
   const [busy, setBusy] = useState(false);
   const end = useRef<HTMLDivElement>(null);
-  useEffect(() => end.current?.scrollIntoView({ behavior: "smooth", block: "nearest" }), [msgs]);
+  useEffect(() => {
+    // Chrome mới: scrollIntoView() trả về Promise — không được trả nó ra khỏi effect.
+    end.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [msgs]);
 
   const send = async (text: string) => {
     if (!text.trim() || busy) return;

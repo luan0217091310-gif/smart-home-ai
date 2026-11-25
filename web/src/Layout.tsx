@@ -23,7 +23,13 @@ export function Layout({ children }: { children: ReactNode }) {
     addEventListener("scroll", on, { passive: true });
     return () => removeEventListener("scroll", on);
   }, []);
-  useEffect(() => setOpen(false), [path]);
+  useEffect(() => { setOpen(false); }, [path]);
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    addEventListener("keydown", onKey);
+    return () => { removeEventListener("keydown", onKey); };
+  }, [open]);
 
   // hiệu ứng hiện dần khi cuộn tới
   useEffect(() => {
@@ -36,18 +42,22 @@ export function Layout({ children }: { children: ReactNode }) {
       else io.observe(el);
     });
     const t = setTimeout(scan, 20);
+    const mo = new MutationObserver(() => scan()); // trang tải lazy → quét lại
+    const mainEl = document.getElementById("main");
+    if (mainEl) mo.observe(mainEl, { childList: true, subtree: true });
     // lưới an toàn: không bao giờ để nội dung bị ẩn nếu observer không chạy
     const safety = () => document.querySelectorAll(".reveal:not(.in)").forEach((el) => {
       if (el.getBoundingClientRect().top < innerHeight + 200) show(el);
     });
     addEventListener("scroll", safety, { passive: true });
-    return () => { clearTimeout(t); io?.disconnect(); removeEventListener("scroll", safety); };
+    return () => { clearTimeout(t); mo.disconnect(); io?.disconnect(); removeEventListener("scroll", safety); };
   }, [path]);
 
   return (
     <>
+      <a href="#main" className="skip">Bỏ qua tới nội dung</a>
       <div className="bg-grid" aria-hidden />
-      <header className={`nav ${scrolled ? "scrolled" : ""}`}>
+      <header className={`nav ${scrolled ? "scrolled" : ""} ${open ? "menu-open" : ""}`}>
         <div className="nav-in">
           <Link to="/" className="brand" aria-label="Trang chủ">
             <Logo />
@@ -68,7 +78,7 @@ export function Layout({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      <main key={path} className="page-enter">{children}</main>
+      <main id="main" key={path} className="page-enter" tabIndex={-1}>{children}</main>
 
       <footer className="footer">
         <div className="footer-in">

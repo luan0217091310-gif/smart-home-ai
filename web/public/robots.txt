@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://smart-home-ai.luan0017091310.workers.dev/sitemap.xml

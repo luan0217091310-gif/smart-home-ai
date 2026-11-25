@@ -1,5 +1,7 @@
 # smart-home-ai — Camera AI Thông Minh
 
+[![CI](https://github.com/luan0217091310-gif/smart-home-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/luan0217091310-gif/smart-home-ai/actions/workflows/ci.yml) · Website: https://smart-home-ai.luan0017091310.workers.dev
+
 Biến một camera thường thành "người trông nhà" có AI: **nhận ra người nhà và báo người lạ**, **nhớ chỗ để đồ** ("Chìa khóa của tôi đâu?"), **phát hiện té ngã**, và **trả lời câu hỏi bằng tiếng Việt** qua Telegram hoặc Dashboard. Toàn bộ xử lý hình ảnh chạy trên máy trong nhà.
 
 - Đặc tả đầy đủ: [docs/SPEC.md](docs/SPEC.md) · Biên bản nghiệm thu: [docs/acceptance/](docs/acceptance/)

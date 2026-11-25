@@ -5,6 +5,7 @@ Chạy:  uvicorn services.assistant_api.main:app --host 0.0.0.0 --port 8000
 from __future__ import annotations
 
 import sys
+from contextlib import asynccontextmanager
 import tempfile
 import threading
 import time
@@ -40,9 +41,37 @@ def _make_bus():
 
 db, bus = DB(), _make_bus()
 agent = Agent(Tools(db, bus))
-app = FastAPI(title="smart-home-ai assistant")
 
-# Cho phép trang web (vd. Vercel) gọi API máy nhà. Danh sách domain trong CORS_ORIGINS, cách nhau dấu phẩy.
+
+def _background_loop() -> None:
+    """Heartbeat + ghi các cảnh báo mà producer (chạy ngoài Docker) gửi qua Redis vào CSDL."""
+    from datetime import datetime
+
+    from shared.config import TZ
+    while True:
+        try:
+            bus.heartbeat(SERVICE)
+            for a in bus.pop_alerts():
+                ts = datetime.fromtimestamp(a["ts"], TZ).replace(tzinfo=None)
+                db.add_alert(a["camera_id"], a["alert_type"], a["message"], status=a["status"], ts=ts)
+        except Exception as e:  # noqa: BLE001
+            log.warning("Vòng nền lỗi: %s", e)
+        time.sleep(10)
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    log.info("Trợ lý dùng LLM: %s", agent.llm.name)
+    if env_bool("TELEGRAM_BOT_ENABLED", True):
+        TelegramBot(agent).start()
+    if bus is not None:
+        threading.Thread(target=_background_loop, daemon=True).start()
+    yield
+
+
+app = FastAPI(title="smart-home-ai assistant", lifespan=lifespan)
+
+# Cho phép trang web gọi API máy nhà — CHỈ các domain liệt kê rõ trong CORS_ORIGINS (mặc định: không cho phép).
 _origins = [o.strip() for o in (env("CORS_ORIGINS") or "").split(",") if o.strip()]
 if _origins:
     from fastapi.middleware.cors import CORSMiddleware
@@ -51,27 +80,6 @@ if _origins:
 
 class ChatIn(BaseModel):
     message: str = Field(..., min_length=1, max_length=1000)
-
-
-@app.on_event("startup")
-def _startup() -> None:
-    log.info("Trợ lý dùng LLM: %s", agent.llm.name)
-    if env_bool("TELEGRAM_BOT_ENABLED", True):
-        TelegramBot(agent).start()
-    if bus is not None:
-        def hb():
-            while True:
-                try:
-                    bus.heartbeat(SERVICE)
-                    for a in bus.pop_alerts():
-                        from datetime import datetime
-                        from shared.config import TZ
-                        ts = datetime.fromtimestamp(a["ts"], TZ).replace(tzinfo=None)
-                        db.add_alert(a["camera_id"], a["alert_type"], a["message"], status=a["status"], ts=ts)
-                except Exception:  # noqa: BLE001
-                    pass
-                time.sleep(10)
-        threading.Thread(target=hb, daemon=True).start()
 
 
 @app.get("/health")
