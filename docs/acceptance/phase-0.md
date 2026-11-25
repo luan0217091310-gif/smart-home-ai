@@ -16,8 +16,8 @@ Ngày: 25/11/2026 · Người thực hiện: AI coding agent
 
 - [x] `nvidia-smi` hiển thị đúng GPU trên máy và trong container (`docker run --rm --gpus all ubuntu nvidia-smi` → `NVIDIA T1200 Laptop GPU, 4096 MiB`).
 - [x] Đọc được hình từ webcam (`python scripts/check_camera.py` → khung 640×480, lưu `data/camera_check.jpg`).
-- [ ] Telegram nhận tin chữ và ảnh — **chờ chủ dự án điền `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` vào `.env`** rồi chạy `python scripts/test_telegram.py`.
-- [ ] LLM trả lời 1 câu tiếng Việt — **chờ `GEMINI_API_KEY`**, chạy `python scripts/check_llm.py`.
+- [x] Telegram nhận tin chữ và ảnh (`scripts/test_telegram.py` → Tin chữ: OK | Ảnh: OK). Dùng lại bot Telegram có sẵn của chủ dự án.
+- [x] Gemini trả lời 1 câu tiếng Việt (`scripts/check_llm.py` → "Thủ đô của Việt Nam là Hà Nội.").
 - [x] `git status` không hiện file nào trong `data/` hoặc `.env` (đã có `.gitignore`).
 
 ## Đề xuất cần duyệt

@@ -29,6 +29,14 @@ pytest: 40/40 đạt (gồm kiểm tra chặn công cụ lạ, tham số sai, đ
 
 Bằng chứng phụ cho GĐ 1: một container producer thử với đường dẫn video sai chạy ngầm > 5 phút đã tự ghi cảnh báo `system` "Mất kết nối camera cam_test quá 5 phút" — đúng thiết kế.
 
+## Kết quả với Gemini thật (25/11, 23:57)
+
+Bộ 7 câu hỏi: **7/7 đúng**, câu trả lời tự nhiên, xưng "em", không bịa vị trí đồ vật chưa theo dõi.
+
+**Telegram dùng chung bot có sẵn của chủ dự án.** Bot đó đang nhận tin bằng long polling, mà Telegram chỉ cho một chương trình nhận tin trên mỗi token.
+Vì vậy `TELEGRAM_BOT_ENABLED=false`: hệ thống camera chỉ **gửi** cảnh báo qua bot này, phần hỏi đáp qua Telegram tạm tắt (hỏi qua tab Trò chuyện của Dashboard).
+Muốn hỏi đáp qua Telegram: tạo bot thứ hai bằng @BotFather, đặt token đó vào `TELEGRAM_BOT_TOKEN` và `TELEGRAM_BOT_ENABLED=true`.
+
 ## Nghiệm thu — cần chủ dự án
 
 - [ ] **[CUNG CẤP]** `GEMINI_API_KEY` → chạy lại `python scripts/eval_assistant.py` với Gemini, đo thời gian < 5 s.
