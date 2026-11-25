@@ -1,0 +1,3 @@
+-r ../stream_producer/requirements.txt
+streamlit==1.67.0
+pandas==3.1.1

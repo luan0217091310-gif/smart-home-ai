@@ -99,5 +99,36 @@ services:
       retries: 3
       start_period: 60s
 
+  dashboard:
+    <<: *common
+    build: {context: ., dockerfile: services/dashboard/Dockerfile}
+    environment:
+      TZ: Asia/Ho_Chi_Minh
+      DATA_DIR: /app/data
+      REDIS_URL: redis://redis:6379/0
+      DATABASE_URL: sqlite:////app/data/smarthome.db
+      ASSISTANT_URL: http://assistant_api:8000
+    ports: ["8501:8501"]   # chỉ mở trong mạng nhà — KHÔNG port-forward ra Internet
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+
+  maintenance:
+    <<: *common
+    build: {context: ., dockerfile: services/dashboard/Dockerfile}
+    command: ["python", "scripts/maintenance.py"]
+    environment:
+      TZ: Asia/Ho_Chi_Minh
+      DATA_DIR: /app/data
+      DATABASE_URL: sqlite:////app/data/smarthome.db
+      BACKUP_DIR: /app/backups
+    volumes:
+      - ./data:/app/data
+      - ./backups:/app/backups
+      - ./config:/app/config:ro
+
 networks:
   smarthome: {}
